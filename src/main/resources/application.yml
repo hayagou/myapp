@@ -1,0 +1,26 @@
+spring:
+  jwt:
+    secret: abcd
+  messages:
+    basename: i18n/exception
+    encoding: utf-8
+  servlet:
+    multipart:
+      enabled: true
+      file-size-threshold: 2B
+      max-file-size: 200MB
+      max-request-size: 215MB
+  redis:
+    host: localhost
+    port: 6379
+#  datasource:
+#    url: jdbc:mariadb://34.82.81.163:3306/mydb
+#    driver-class-name: org.mariadb.jdbc.Driver
+#    username: user
+#    password: 1234
+#  jpa:
+#    open-in-view: false
+#    generate-ddl: true
+#    show-sql: true
+#    hibernate:
+#      ddl-auto: create #update
