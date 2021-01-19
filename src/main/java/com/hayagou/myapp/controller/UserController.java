@@ -1,4 +1,4 @@
-package com.hayagou.myapp.restcontroller;
+package com.hayagou.myapp.controller;
 
 import com.hayagou.myapp.model.dto.UserInfoDto;
 import com.hayagou.myapp.model.dto.UserUpdateDto;
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping
-public class UserRestController {
+public class UserController {
 
     private final UserService userService;
     private final ResponseService responseService; // 결과를 처리할 Service

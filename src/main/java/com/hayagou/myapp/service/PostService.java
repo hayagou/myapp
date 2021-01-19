@@ -35,7 +35,6 @@ public class PostService {
 
     // 게시판 이름으로 게시판을 조회. 없을경우 CResourceNotExistException 처리
     @Transactional(readOnly = true)
-    @Cacheable(value = CacheKey.BOARD, key = "#boardName", unless ="#result == null")
     public Board findBoard(String boardName) {
         return Optional.ofNullable(boardRepository.findByName(boardName)).orElseThrow(CResourceNotExistException::new);
     }
@@ -44,7 +43,7 @@ public class PostService {
     public Long writePost(String email, String boardName, PostRequestDto postRequestDto) {
         Board board = findBoard(boardName);
         Post post = new Post(userRepository.findByEmail(email).orElseThrow(CUserNotFoundException::new), board , postRequestDto.getTitle(), postRequestDto.getContent());
-       ;
+
         return  postRepository.save(post).getPostId();
     }
 

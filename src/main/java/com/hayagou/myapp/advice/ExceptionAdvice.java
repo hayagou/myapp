@@ -72,4 +72,11 @@ public class ExceptionAdvice {
     }
 
 
+    @ExceptionHandler(CProductNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    protected CommonResult emailSigninFailed(HttpServletRequest request, CProductNotFoundException e) {
+        return responseService.getFailResult(Integer.valueOf(getMessage("productNotFoundException.code")), getMessage("productNotFoundException.msg"));
+    }
+
+
 }

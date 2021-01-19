@@ -23,3 +23,6 @@ emailSigninFailed:
 fileStorageException:
   code: "-2000"
   msg: "Could not store this file"
+productNotFoundException:
+  code: "-3000"
+  msg: "The Product does not exist."

@@ -59,7 +59,6 @@ public class UserService {
     }
 
     @Transactional
-    @Cacheable(value = CacheKey.USER, key = "#email", unless = "#result == null")
     public UserInfoDto getUser(String email){
         User user = userRepository.findByEmail(email).orElseThrow(CUserNotFoundException::new);
         return UserInfoDto.builder().email(user.getEmail()).name(user.getName()).createAt(user.getCreatedAt()).build();

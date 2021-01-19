@@ -1,4 +1,4 @@
-package com.hayagou.myapp.restcontroller;
+package com.hayagou.myapp.controller;
 
 import com.hayagou.myapp.model.dto.BoardDto;
 import com.hayagou.myapp.model.dto.PostListDto;
@@ -22,7 +22,7 @@ import javax.validation.Valid;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(value = "/board")
-public class BoardRestController {
+public class BoardController {
 
     private final PostService postService;
     private final BoardService boardService;

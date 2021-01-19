@@ -1,4 +1,4 @@
-package com.hayagou.myapp.restcontroller.exception;
+package com.hayagou.myapp.controller.exception;
 
 import com.hayagou.myapp.advice.exception.CAuthenticationEntryPointException;
 import com.hayagou.myapp.model.response.CommonResult;

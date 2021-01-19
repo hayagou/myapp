@@ -22,3 +22,6 @@ emailSigninFailed:
 fileStorageException:
   code: "-2000"
   msg: "파일을 저장할수 없습니다."
+productNotFoundException:
+  code: "-3000"
+  msg: "상품이 존재 하지 않습니다."

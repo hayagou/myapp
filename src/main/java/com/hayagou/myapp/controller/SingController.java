@@ -1,30 +1,23 @@
-package com.hayagou.myapp.restcontroller;
+package com.hayagou.myapp.controller;
 
-import com.hayagou.myapp.advice.exception.CEmailSigninFailedException;
-import com.hayagou.myapp.config.security.JwtTokenProvider;
-import com.hayagou.myapp.entity.User;
 import com.hayagou.myapp.model.response.CommonResult;
 import com.hayagou.myapp.model.response.SingleResult;
-import com.hayagou.myapp.repository.UserRepository;
 import com.hayagou.myapp.service.ResponseService;
 import com.hayagou.myapp.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collections;
-
 @Api(tags = {"1. Sign"})
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(value = "/user")
-public class SingRestController {
+public class SingController {
 
     private final UserService userService;
     private final ResponseService responseService;
