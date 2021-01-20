@@ -9,5 +9,6 @@ import java.util.Optional;
 
 public interface CategoryRepository extends JpaRepository<Category, Long> {
     Page<Category> findAll(Pageable pageable);
-   Category findByName(String name);
+
+    Category findByName(String name);
 }
