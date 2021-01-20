@@ -21,7 +21,7 @@ public class BoardService {
     // 모든 게시판 조회
     @Transactional(readOnly = true)
     public List<BoardDto> getBoardList(int page){
-        Page<Board> list = boardRepository.findAll(PageRequest.of(page, 10,  Sort.by(Sort.Direction.DESC, "createdAt")));
+        Page<Board> list = boardRepository.findAll(PageRequest.of(page-1, 10,  Sort.by(Sort.Direction.DESC, "createdAt")));
         List<BoardDto> boardList = new ArrayList<>();
         for (Board board: list) {
             boardList.add(BoardDto.builder().boardName(board.getName()).build());
