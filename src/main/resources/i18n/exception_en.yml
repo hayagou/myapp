@@ -26,3 +26,15 @@ fileStorageException:
 productNotFoundException:
   code: "-3000"
   msg: "The Product does not exist."
+fileException:
+  code: "-4000"
+  msg: "파일을 처리중 오류가 발생했습니다."
+fileNotFoundException:
+  code: "-4001"
+  msg: "파일을 찾을수 없습니다."
+notCreateDirException:
+  code: "-4002"
+  msg: "Coul not create the directory where the uploaded files will be stored."
+invalidPath:
+  code: "-4003"
+  msg: "Sorry! Filename contains invalid path sequence"

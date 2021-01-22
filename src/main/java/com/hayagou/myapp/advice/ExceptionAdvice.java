@@ -74,8 +74,32 @@ public class ExceptionAdvice {
 
     @ExceptionHandler(CProductNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    protected CommonResult emailSigninFailed(HttpServletRequest request, CProductNotFoundException e) {
+    protected CommonResult productNotFound(HttpServletRequest request, CProductNotFoundException e) {
         return responseService.getFailResult(Integer.valueOf(getMessage("productNotFoundException.code")), getMessage("productNotFoundException.msg"));
+    }
+
+    @ExceptionHandler(CFileException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    protected CommonResult fileException(HttpServletRequest request, CFileException e) {
+        return responseService.getFailResult(Integer.valueOf(getMessage("fileException.code")), getMessage("fileException.msg"));
+    }
+
+    @ExceptionHandler(CFileNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    protected CommonResult fileNotFoundException(HttpServletRequest request, CFileNotFoundException e) {
+        return responseService.getFailResult(Integer.valueOf(getMessage("fileNotFoundException.code")), getMessage("fileNotFoundException.msg"));
+    }
+
+    @ExceptionHandler(CNotCreateDirException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    protected CommonResult notCreateDirException(HttpServletRequest request, CNotCreateDirException e) {
+        return responseService.getFailResult(Integer.valueOf(getMessage("notCreateDirException.code")), getMessage("notCreateDirException.msg"));
+    }
+
+    @ExceptionHandler(CInvalidPathException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    protected CommonResult invalidPath(HttpServletRequest request, CInvalidPathException e) {
+        return responseService.getFailResult(Integer.valueOf(getMessage("invalidPath.code")), getMessage("invalidPath.msg"));
     }
 
 
