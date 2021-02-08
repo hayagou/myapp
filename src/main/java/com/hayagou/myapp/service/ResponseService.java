@@ -30,10 +30,13 @@ public class ResponseService {
     }
     // 단일건 결과를 처리하는 메소드
     public <T> DataResponse<T> getResponse(T data) {
-        DataResponse<T> result = new DataResponse<>();
-        result.setData(data);
-        return result;
+        DataResponse<T> response = new DataResponse<>();
+        response.setData(data);
+        return response;
     }
+
+
+
 
     public <T> DataResponse<T> getResponse(T data, ResponseMessage message) {
         DataResponse<T> result = new DataResponse<>();

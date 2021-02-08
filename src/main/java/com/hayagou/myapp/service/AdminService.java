@@ -2,6 +2,7 @@ package com.hayagou.myapp.service;
 
 import com.hayagou.myapp.advice.exception.CUserNotFoundException;
 import com.hayagou.myapp.entity.User;
+import com.hayagou.myapp.model.dto.PaginationDto;
 import com.hayagou.myapp.model.dto.UserResponseDto;
 import com.hayagou.myapp.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -19,9 +21,10 @@ import java.util.List;
 public class AdminService {
     final UserRepository userRepository;
 
-    
+
+
     //회원 정보 조회
-    public HashMap<?,?> getUsers(int page, int size, String key) {
+    public PaginationDto getUsers(int page, int size, String key) {
 
         int totalCount = (int)userRepository.count();
 
@@ -67,15 +70,17 @@ public class AdminService {
             userList.add(UserResponseDto.builder().name(user.getName()).email(user.getEmail()).roles(user.getRoles()).createdAt(user.getCreatedAt()).build());
         }
 
-        HashMap<String, Object> map = new HashMap<>();
-        map.put("list" , userList);
-        map.put("totalCount", totalCount);
-        map.put("totalPage", totalPage);
-        map.put("currentPage", page);
-        return map;
+//        PaginationDto<?> paginationDto = PaginationDto.builder().totalPage(totalPage).totalPage(totalPage).currentPage(page).items(Collections.singletonList(userList)).build();
 
+        PaginationDto paginationDto = PaginationDto.builder().totalPage(totalPage).totalCount(totalCount).currentPage(page).items(Collections.singletonList(userList)).build();
+        return paginationDto;
 
     }
+
+
+    // totalPage =  int totalPage = totalCount / size;
+
+
 
 
 //    public ResponseList<PostListDto> getPosts(String boardName, int page, int size) {

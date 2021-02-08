@@ -14,7 +14,7 @@ public class Board extends Time {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long boardId;
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false, length = 100, unique = true)
     private String name;
 
     @Builder

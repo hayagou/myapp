@@ -1,5 +1,6 @@
 package com.hayagou.myapp.controller;
 
+import com.hayagou.myapp.model.response.DataResponse;
 import com.hayagou.myapp.service.AdminService;
 import com.hayagou.myapp.service.ResponseService;
 import io.swagger.annotations.*;
@@ -21,12 +22,13 @@ public class AdminController {
     // 전체 회원 조회
     @ApiOperation(value = "회원 리스트 조회", notes = "key : [userId, name, eamil, createdAt(default)], " + "오름차순: -[key] ex) key=-createdAt")
     @GetMapping(value = "/users")
-    public ResponseEntity<?> findAllUser(
+    public DataResponse findAllUser(
             @ApiParam(value = "Page", defaultValue = "1") @Min(0) @RequestParam int page,
             @ApiParam(value = "Per Page", defaultValue = "10") @Min(0) @RequestParam int size,
             @ApiParam(value = "조회 유형", defaultValue = "createdAt") @Min(0) @RequestParam String key) {
 
-        return ResponseEntity.ok(responseService.getResponse((adminService.getUsers(page, size, key))));
+
+        return responseService.getResponse((adminService.getUsers(page, size, key)));
     }
 
 //    // 특정 회원 조회
