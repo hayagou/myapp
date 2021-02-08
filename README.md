@@ -20,3 +20,6 @@ restapi 설계
 
 공통응답
 msg:
+
+
+Reference : https://google.github.io/styleguide/jsoncstyleguide.xml
