@@ -2,9 +2,8 @@ package com.hayagou.myapp.controller;
 
 import com.hayagou.myapp.model.dto.UserInfoDto;
 import com.hayagou.myapp.model.dto.UserUpdateDto;
-import com.hayagou.myapp.model.response.CommonResult;
-import com.hayagou.myapp.model.response.ListResult;
-import com.hayagou.myapp.model.response.SingleResult;
+import com.hayagou.myapp.model.response.ListResponse;
+import com.hayagou.myapp.model.response.DataResponse;
 import com.hayagou.myapp.service.ResponseService;
 import com.hayagou.myapp.service.UserService;
 import io.swagger.annotations.*;
@@ -24,7 +23,7 @@ public class UserController {
 
     @ApiOperation(value = "회원 리스트 조회", notes = "모든 회원을 조회한다")
     @GetMapping(value = "/users")
-    public ListResult<UserInfoDto> findAllUser(@ApiParam(value = "페이지", defaultValue = "1") @RequestParam int page) {
+    public ListResponse<UserInfoDto> findAllUser(@ApiParam(value = "페이지", defaultValue = "1") @RequestParam int page) {
         // 결과데이터가 여러건인경우 getListResult를 이용해서 결과를 출력한다.
         return responseService.getListResult(userService.getUsers(page));
     }
@@ -34,11 +33,11 @@ public class UserController {
     })
     @ApiOperation(value = "회원 단건 조회", notes = "자신의 정보를 조회한다")
     @GetMapping(value = "/user")
-    public SingleResult<UserInfoDto> findUserById() {
+    public DataResponse<UserInfoDto> findUserById() {
         // 결과데이터가 단일건인경우 getBasicResult를 이용해서 결과를 출력한다.
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
-        return responseService.getSingleResult(userService.getUser(email));
+        return responseService.getResponse(userService.getUser(email));
     }
 
     @ApiImplicitParams({
@@ -46,14 +45,14 @@ public class UserController {
     })
     @ApiOperation(value = "회원 수정", notes = "회원정보를 수정한다")
     @PutMapping(value = "/user")
-    public CommonResult modify(
+    public DataResponse<UserInfoDto> modify(
             @ApiParam(value = "회원정보", required = true) @ModelAttribute UserUpdateDto userUpdateDto) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         userService.updateUser(email, userUpdateDto);
 
-        return responseService.getSuccessResult();
+        return responseService.getResponse(userService.updateUser(email, userUpdateDto));
     }
 
     @ApiImplicitParams({
@@ -61,12 +60,12 @@ public class UserController {
     })
     @ApiOperation(value = "회원 탈퇴", notes = "회원정보를 삭제한다")
     @DeleteMapping(value = "/user")
-    public CommonResult delete() {
+    public DataResponse<?> delete() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
-        userService.deleteUser(email);
+
         // 성공 결과 정보만 필요한경우 getSuccessResult()를 이용하여 결과를 출력한다.
-        return responseService.getSuccessResult();
+        return responseService.getResponse(userService.deleteUser(email));
     }
     //유저 정보 조회
 

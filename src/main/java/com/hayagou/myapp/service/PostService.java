@@ -9,21 +9,18 @@ import com.hayagou.myapp.entity.User;
 import com.hayagou.myapp.model.dto.PostListDto;
 import com.hayagou.myapp.model.dto.PostRequestDto;
 import com.hayagou.myapp.model.dto.PostResponseDto;
-import com.hayagou.myapp.model.redis.CacheKey;
+import com.hayagou.myapp.model.response.ListResponse;
 import com.hayagou.myapp.repository.BoardRepository;
 import com.hayagou.myapp.repository.PostRepository;
 import com.hayagou.myapp.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @RequiredArgsConstructor
 @Service
@@ -38,38 +35,60 @@ public class PostService {
     public Board findBoard(String boardName) {
         return Optional.ofNullable(boardRepository.findByName(boardName)).orElseThrow(CResourceNotExistException::new);
     }
+
     // 게시물을 등록합니다. 게시물의 회원UID가 조회되지 않으면 CUserNotFoundException 처리합니다.
     @Transactional
     public Long writePost(String email, String boardName, PostRequestDto postRequestDto) {
         Board board = findBoard(boardName);
-        Post post = new Post(userRepository.findByEmail(email).orElseThrow(CUserNotFoundException::new), board , postRequestDto.getTitle(), postRequestDto.getContent());
+        Post post = new Post(userRepository.findByEmail(email).orElseThrow(CUserNotFoundException::new), board, postRequestDto.getTitle(), postRequestDto.getContent());
 
-        return  postRepository.save(post).getPostId();
+        return postRepository.save(post).getPostId();
     }
 
     @Transactional
-    public PostResponseDto getPost(long postId){
+    public PostResponseDto getPost(long postId) {
         Post post = postRepository.findById(postId).orElseThrow(CResourceNotExistException::new);
         post.updateCount(post.getViewCount());
         PostResponseDto postResponseDto = PostResponseDto.builder().title(post.getTitle()).content(post.getContent()).author(post.getAuthor()).postId(post.getPostId())
-                .createAt(post.getCreatedAt()).viewCount(post.getViewCount()).build();
+                .createdAt(post.getCreatedAt()).viewCount(post.getViewCount()).build();
         return postResponseDto;
     }
 
     @Transactional(readOnly = true)
-    public List<PostListDto> getPosts(String boardName, int page){
+    public List<PostListDto> getPosts(String boardName, int page) {
+
+
         Board board = findBoard(boardName);
-        Page<Post> list = postRepository.findByBoard(board , PageRequest.of(page-1, 10,  Sort.by(Sort.Direction.DESC, "createdAt")));
+        Page<Post> list = postRepository.findByBoard(board, PageRequest.of(page - 1, 10, Sort.by(Sort.Direction.DESC, "createdAt")));
         List<PostListDto> postList = new ArrayList<>();
-        for (Post post: list) {
+        for (Post post : list) {
             postList.add(PostListDto.builder().title(post.getTitle()).postId(post.getPostId())
-                    .author(post.getAuthor()).viewCount(post.getViewCount()).createAt(post.getCreatedAt()).build());
+                    .author(post.getAuthor()).viewCount(post.getViewCount()).createdAt(post.getCreatedAt()).build());
         }
         return postList;
     }
 
+//    @Transactional(readOnly = true)
+//    public Map<String, Object> getPostsTest(String boardName, int page){
+//
+//
+//        Board board = findBoard(boardName);
+//        Page<Post> list = postRepository.findByBoard(board , PageRequest.of(page-1, 10,  Sort.by(Sort.Direction.DESC, "createdAt")));
+//        List<PostListDto> postList = new ArrayList<>();
+//        for (Post post: list) {
+//            postList.add(PostListDto.builder().title(post.getTitle()).postId(post.getPostId())
+//                    .author(post.getAuthor()).viewCount(post.getViewCount()).createdAt(post.getCreatedAt()).build());
+//        }
+//
+//        int count = postRepository.countAllByBoard(board);
+//        Map<String, Object> map = new HashMap<>();
+//        map.put("totalCount", count);
+//        map.put("list", postList);
+//        return map;
+//    }
+
     @Transactional
-    public PostResponseDto updatePost(String email, long postId, PostRequestDto postRequestDto){
+    public PostResponseDto updatePost(String email, long postId, PostRequestDto postRequestDto) {
         Post post = postRepository.findById(postId).orElseThrow(CResourceNotExistException::new);
         User user = post.getUser();
         if (!email.equals(user.getEmail()))
@@ -92,15 +111,80 @@ public class PostService {
     }
 
     @Transactional
-    public List<PostListDto> getSearchPosts(String boardName, String keyword, int page){
+    public List<PostListDto> getSearchPosts(String boardName, String keyword, int page) {
         Board board = findBoard(boardName);
-        Page<Post> list = postRepository.findAllSearch(board, keyword , PageRequest.of(page-1, 10,  Sort.by(Sort.Direction.DESC, "createdAt")));
+        Page<Post> list = postRepository.findAllSearch(board, keyword, PageRequest.of(page - 1, 10, Sort.by(Sort.Direction.DESC, "createdAt")));
         List<PostListDto> postList = new ArrayList<>();
-        for (Post post: list) {
+        for (Post post : list) {
             postList.add(PostListDto.builder().title(post.getTitle()).postId(post.getPostId())
-                    .author(post.getAuthor()).viewCount(post.getViewCount()).createAt(post.getCreatedAt()).build());
+                    .author(post.getAuthor()).viewCount(post.getViewCount()).createdAt(post.getCreatedAt()).build());
         }
         return postList;
     }
 
+
+//    //    Angular에서 페이징처리를 위한 게시글 조회 and RestFul하게 다시 설계
+//    @Transactional(readOnly = true)
+//    public ListResponse<PostListDto> getPosts(String boardName, int page, int size) {
+//        Board board = findBoard(boardName);
+//        int totalCount = postRepository.countAllByBoard(board);
+//
+//        int totalPage = totalCount / size;
+//
+//        if (totalCount % size > 0) {
+//            totalPage++;
+//        }
+//
+//        if (totalPage < page) {
+//            page = totalPage;
+//        }
+//
+//        Page<Post> list = postRepository.findByBoard(board, PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "createdAt")));
+//        List<PostListDto> postList = new ArrayList<>();
+//        for (Post post : list) {
+//            postList.add(PostListDto.builder().title(post.getTitle()).postId(post.getPostId())
+//                    .author(post.getAuthor()).viewCount(post.getViewCount()).createdAt(post.getCreatedAt()).build());
+//        }
+//        ResponseList<PostListDto> response = new ResponseList<>();
+//        response.setList(postList);
+//        response.setCurrentPage(page);
+//        response.setTotalCount(totalCount);
+//        response.setTotalPage(totalPage);
+////        response.setMsg(ResponseService.Response.SUCCESS.getMsg());
+//        return response;
+//    }
+//
+//
+//    @Transactional
+//    public ListResponse<PostListDto> getSearchPosts(String boardName, String keyword, int page, int size) {
+//        Board board = findBoard(boardName);
+//
+//        int totalCount = postRepository.countAllSearch(board, keyword);
+//
+//        int totalPage = totalCount / size;
+//
+//        if (totalCount % size > 0) {
+//            totalPage++;
+//        }
+//
+//        if (totalPage < page) {
+//            page = totalPage;
+//        }
+//
+//
+//        Page<Post> list = postRepository.findAllSearch(board, keyword, PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "createdAt")));
+//        List<PostListDto> postList = new ArrayList<>();
+//        for (Post post : list) {
+//            postList.add(PostListDto.builder().title(post.getTitle()).postId(post.getPostId())
+//                    .author(post.getAuthor()).viewCount(post.getViewCount()).createdAt(post.getCreatedAt()).build());
+//        }
+//
+//        ResponseList<PostListDto> response = new ResponseList<>();
+//        response.setList(postList);
+//        response.setCurrentPage(page);
+//        response.setTotalCount(totalCount);
+//        response.setTotalPage(totalPage);
+////        response.setMsg(ResponseService.Response.SUCCESS.getMsg());
+//        return response;
+//    }
 }

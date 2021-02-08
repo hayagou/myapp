@@ -28,6 +28,7 @@ public class User extends Time implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
 
+    @Column(unique = true)
     private String name;
 
     @Column(nullable = false, unique = true, length = 30)

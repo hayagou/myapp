@@ -62,7 +62,7 @@ public class FileController {
 
     @CrossOrigin(origins = "*", allowedHeaders = "*")
     @PostMapping("/{postId}/uploadMultipleFiles")
-    public List<FileResponseDto> uploadMultipleFiles(@PathVariable Long postId, @RequestParam("files") MultipartFile[] multipartFiles){
+    public List<FileResponseDto> uploadMultipleFiles(@PathVariable Long postId, @RequestParam MultipartFile[] multipartFiles){
         return Arrays.asList(multipartFiles)
                 .stream()
                 .map(file -> uploadFile(postId, file))

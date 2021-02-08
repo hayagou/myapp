@@ -18,7 +18,7 @@ public class PostResponseDto {
     private String author;
     private int viewCount;
     private int replyCount;
-    private LocalDateTime createAt;
+    private LocalDateTime createdAt;
 
 //    public Post toEntity(){
 //        return Post.builder()

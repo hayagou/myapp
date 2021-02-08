@@ -15,5 +15,5 @@ public class PostListDto {
     private String author;
     private int viewCount;
     private int replyCount;
-    private LocalDateTime createAt;
+    private LocalDateTime createdAt;
 }

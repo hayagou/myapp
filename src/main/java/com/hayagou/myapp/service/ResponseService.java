@@ -1,8 +1,7 @@
 package com.hayagou.myapp.service;
 
-import com.hayagou.myapp.model.response.CommonResult;
-import com.hayagou.myapp.model.response.ListResult;
-import com.hayagou.myapp.model.response.SingleResult;
+import com.hayagou.myapp.model.response.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -10,59 +9,62 @@ import java.util.List;
 @Service // 해당 Class가 Service임을 명시합니다.
 public class ResponseService {
 
-    // enum으로 api 요청 결과에 대한 code, message를 정의합니다.
-    public enum CommonResponse {
-        SUCCESS(0, "성공하였습니다."),
-        FAIL(-1, "실패하였습니다.");
+    @Value("${info}")
+    private String info;
 
-        int code;
+//    // enum으로 api 요청 결과에 대한  message를 정의합니다.
+    public enum ResponseMessage {
+        SUCCESS( "성공하였습니다.");
+
+
         String msg;
 
-        CommonResponse(int code, String msg) {
-            this.code = code;
+        ResponseMessage(String msg) {
             this.msg = msg;
         }
 
-        public int getCode() {
-            return code;
-        }
 
         public String getMsg() {
             return msg;
         }
     }
     // 단일건 결과를 처리하는 메소드
-    public <T> SingleResult<T> getSingleResult(T data) {
-        SingleResult<T> result = new SingleResult<>();
+    public <T> DataResponse<T> getResponse(T data) {
+        DataResponse<T> result = new DataResponse<>();
         result.setData(data);
-        setSuccessResult(result);
         return result;
     }
+
+    public <T> DataResponse<T> getResponse(T data, ResponseMessage message) {
+        DataResponse<T> result = new DataResponse<>();
+        result.setData(data);
+
+        return result;
+    }
+
     // 다중건 결과를 처리하는 메소드
-    public <T> ListResult<T> getListResult(List<T> list) {
-        ListResult<T> result = new ListResult<>();
+    public <T> ListResponse<T> getListResult(List<T> list) {
+        ListResponse<T> result = new ListResponse<>();
         result.setList(list);
-        setSuccessResult(result);
         return result;
     }
-    // 성공 결과만 처리하는 메소드
-    public CommonResult getSuccessResult() {
-        CommonResult result = new CommonResult();
-        setSuccessResult(result);
+
+
+
+
+    public <T> ListResponse<T> getListResponse(List<T> list) {
+        ListResponse<T> result = new ListResponse<>();
+        result.setList(list);
         return result;
     }
+
     // 실패 결과만 처리하는 메소드
-    public CommonResult getFailResult(int code, String msg) {
-        CommonResult result = new CommonResult();
-        result.setResult(false);
-        result.setCode(code);
-        result.setMsg(msg);
-        return result;
+    public ErrorResponse getFailResult(int code, String msg) {
+        ErrorResponseInfo info = new ErrorResponseInfo();
+        info.setCode(code);
+        info.setMsg(msg);
+        info.setInfo(this.info);
+        return new ErrorResponse(info);
     }
-    // 결과 모델에 api 요청 성공 데이터를 세팅해주는 메소드
-    private void setSuccessResult(CommonResult result) {
-        result.setResult(true);
-        result.setCode(CommonResponse.SUCCESS.getCode());
-        result.setMsg(CommonResponse.SUCCESS.getMsg());
-    }
+
 }

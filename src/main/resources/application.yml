@@ -17,6 +17,7 @@ spring:
 file:
   upload-dir : ./uploads
   image-dir : ./images
+info: hayagou.github.io
 #  redis:
 #    host: localhost
 #    port: 6379

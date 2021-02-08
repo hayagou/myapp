@@ -17,6 +17,12 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     )
     Page<Post> findAllSearch(@Param("board")Board board, String keyword, Pageable pageable);
 
+    @Query(
+            value = "SELECT count(p.postId) FROM Post p, Board b where :#{#board.boardId} = p.board.boardId and p.title like %:keyword% or p.content like  %:keyword%"
+    )
+    int countAllSearch(Board board, String keyword);
+
+    int countAllByBoard(Board board);
 
 
 }

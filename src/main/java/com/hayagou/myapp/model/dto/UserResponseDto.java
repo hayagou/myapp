@@ -3,6 +3,7 @@ package com.hayagou.myapp.model.dto;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Builder
 @Getter
@@ -10,8 +11,9 @@ import java.time.LocalDateTime;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserInfoDto {
+public class UserResponseDto {
     private String email;
     private String name;
     private LocalDateTime createdAt;
+    private List<String> roles;
 }

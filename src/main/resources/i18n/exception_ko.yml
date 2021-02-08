@@ -37,3 +37,6 @@ notCreateDirException:
 invalidPath:
   code: "-4003"
   msg: "유효하지 않은 경로를 포합하고 있습니다."
+duplicatedException:
+  code: "-900"
+  msg: "등록된 Email 입니다."

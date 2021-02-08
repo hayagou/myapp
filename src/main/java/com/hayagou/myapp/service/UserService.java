@@ -2,6 +2,7 @@ package com.hayagou.myapp.service;
 
 import com.hayagou.myapp.advice.exception.CEmailSigninFailedException;
 import com.hayagou.myapp.advice.exception.CUserNotFoundException;
+import com.hayagou.myapp.advice.exception.DuplicatedException;
 import com.hayagou.myapp.config.security.JwtTokenProvider;
 import com.hayagou.myapp.entity.Post;
 import com.hayagou.myapp.entity.User;
@@ -31,6 +32,16 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
+    public boolean emailCheck(String email){
+        if(!userRepository.existsByEmail(email)){
+            return true;
+        }else{
+            throw new DuplicatedException();
+        }
+
+    }
+
+    @Transactional
     public String signin(String email, String password){
         User user = userRepository.findByEmail(email).orElseThrow(CEmailSigninFailedException::new);
         if (!passwordEncoder.matches(password, user.getPassword()))
@@ -39,13 +50,16 @@ public class UserService {
         return jwtTokenProvider.createToken(String.valueOf(user.getUserId()), user.getRoles());
     }
     @Transactional
-    public void singup(String email, String password, String name){
-        userRepository.save(User.builder()
+    public UserInfoDto singup(String email, String password, String name){
+        User user = userRepository.save(User.builder()
                 .email(email)
                 .password(passwordEncoder.encode(password))
                 .name(name)
                 .roles(Collections.singletonList("ROLE_USER"))
                 .build());
+
+
+        return UserInfoDto.builder().email(user.getEmail()).name(user.getName()).createdAt(user.getCreatedAt()).build();
     }
 
     @Transactional
@@ -53,7 +67,7 @@ public class UserService {
         Page<User> list = userRepository.findAll(PageRequest.of(page-1, 10,  Sort.by(Sort.Direction.DESC, "createdAt")));
         List<UserInfoDto> userList = new ArrayList<>();
         for (User user: list) {
-            userList.add(UserInfoDto.builder().name(user.getName()).email(user.getEmail()).createAt(user.getCreatedAt()).build());
+            userList.add(UserInfoDto.builder().name(user.getName()).email(user.getEmail()).createdAt(user.getCreatedAt()).build());
         }
         return userList;
     }
@@ -61,25 +75,28 @@ public class UserService {
     @Transactional
     public UserInfoDto getUser(String email){
         User user = userRepository.findByEmail(email).orElseThrow(CUserNotFoundException::new);
-        return UserInfoDto.builder().email(user.getEmail()).name(user.getName()).createAt(user.getCreatedAt()).build();
+        return UserInfoDto.builder().email(user.getEmail()).name(user.getName()).createdAt(user.getCreatedAt()).build();
     }
 
     @Transactional
-    public void updateUser(String email, UserUpdateDto userUpdateDto){
+    public UserInfoDto updateUser(String email, UserUpdateDto userUpdateDto){
         User user = userRepository.findByEmail(email).orElseThrow(CUserNotFoundException::new);
         user.updateUserInfo(userUpdateDto.getName());
+        return UserInfoDto.builder().email(user.getEmail()).name(user.getName()).createdAt(user.getCreatedAt()).build();
     }
 
     @Transactional
-    public void updatePassword(String email, String password){
+    public boolean updatePassword(String email, String password){
         User user = userRepository.findByEmail(email).orElseThrow(CUserNotFoundException::new);
         user.updatePassword(passwordEncoder.encode(password));
+        return true;
     }
 
     @Transactional
-    public void deleteUser(String email){
+    public boolean deleteUser(String email){
         User user = userRepository.findByEmail(email).orElseThrow(CUserNotFoundException::new);
         userRepository.delete(user);
+        return true;
     }
 
 }
