@@ -58,7 +58,7 @@ public class PostService {
         Post post = postRepository.findById(postId).orElseThrow(CResourceNotExistException::new);
         post.updateCount(post.getViewCount());
         PostResponseDto postResponseDto = PostResponseDto.builder().title(post.getTitle()).content(post.getContent()).author(post.getAuthor()).postId(post.getPostId())
-                .createdAt(post.getCreatedAt()).viewCount(post.getViewCount()).build();
+                .createdAt(post.getCreatedAt()).viewCount(post.getViewCount()).replyCount(post.getReplyCount()).build();
         return postResponseDto;
     }
 
@@ -86,7 +86,7 @@ public class PostService {
         List<PostResponseDto> postList = new ArrayList<>();
         for (Post post : list) {
             postList.add(PostResponseDto.builder().title(post.getTitle()).postId(post.getPostId())
-                    .author(post.getAuthor()).viewCount(post.getViewCount()).createdAt(post.getCreatedAt()).build());
+                    .author(post.getAuthor()).viewCount(post.getViewCount()).createdAt(post.getCreatedAt()).replyCount(post.getReplyCount()).build());
         }
 
 

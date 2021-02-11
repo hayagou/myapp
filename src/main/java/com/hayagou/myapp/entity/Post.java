@@ -59,4 +59,8 @@ public class Post extends Time {
     public void updateCount(int count){
         this.viewCount = count + 1;
     }
+
+    public void updateReplyCount(int count){
+        this.replyCount = count+1;
+    }
 }
