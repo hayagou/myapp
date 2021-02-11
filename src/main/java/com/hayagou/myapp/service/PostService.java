@@ -6,9 +6,7 @@ import com.hayagou.myapp.advice.exception.CUserNotFoundException;
 import com.hayagou.myapp.entity.Board;
 import com.hayagou.myapp.entity.Post;
 import com.hayagou.myapp.entity.User;
-import com.hayagou.myapp.model.dto.PostListDto;
-import com.hayagou.myapp.model.dto.PostRequestDto;
-import com.hayagou.myapp.model.dto.PostResponseDto;
+import com.hayagou.myapp.model.dto.*;
 import com.hayagou.myapp.model.response.ListResponse;
 import com.hayagou.myapp.repository.BoardRepository;
 import com.hayagou.myapp.repository.PostRepository;
@@ -38,11 +36,21 @@ public class PostService {
 
     // 게시물을 등록합니다. 게시물의 회원UID가 조회되지 않으면 CUserNotFoundException 처리합니다.
     @Transactional
-    public Long writePost(String email, String boardName, PostRequestDto postRequestDto) {
+    public PostResponseDto writePost(String email, String boardName, PostRequestDto postRequestDto) {
         Board board = findBoard(boardName);
         Post post = new Post(userRepository.findByEmail(email).orElseThrow(CUserNotFoundException::new), board, postRequestDto.getTitle(), postRequestDto.getContent());
 
-        return postRepository.save(post).getPostId();
+        Post savedPost = postRepository.save(post);
+        PostResponseDto postResponseDto = PostResponseDto.builder()
+                .author(savedPost.getAuthor())
+                .postId(savedPost.getPostId())
+                .content(savedPost.getContent())
+                .createdAt(savedPost.getCreatedAt())
+                .replyCount(savedPost.getReplyCount())
+                .title(savedPost.getTitle())
+                .viewCount(savedPost.getViewCount())
+                .build();
+        return postResponseDto;
     }
 
     @Transactional
@@ -55,18 +63,55 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public List<PostListDto> getPosts(String boardName, int page) {
+    public PaginationDto getPosts(String boardName, int page, int size) {
 
 
         Board board = findBoard(boardName);
+
+        int totalCount = (int) postRepository.countAllByBoard(board);
+
+        int totalPage = totalCount / size;
+
+        if (totalCount % size > 0) {
+            totalPage++;
+        }
+
+        if (totalPage < page) {
+            page = totalPage;
+        }
+
+
+
         Page<Post> list = postRepository.findByBoard(board, PageRequest.of(page - 1, 10, Sort.by(Sort.Direction.DESC, "createdAt")));
-        List<PostListDto> postList = new ArrayList<>();
+        List<PostResponseDto> postList = new ArrayList<>();
         for (Post post : list) {
-            postList.add(PostListDto.builder().title(post.getTitle()).postId(post.getPostId())
+            postList.add(PostResponseDto.builder().title(post.getTitle()).postId(post.getPostId())
                     .author(post.getAuthor()).viewCount(post.getViewCount()).createdAt(post.getCreatedAt()).build());
         }
-        return postList;
+
+
+        PaginationDto paginationDto = PaginationDto.builder()
+                .totalPage(totalPage)
+                .totalCount(totalCount)
+                .currentPage(page)
+                .items(Collections.singletonList(postList)).build();
+
+        return paginationDto;
     }
+
+//    @Transactional(readOnly = true)
+//    public List<PostListDto> getPosts(String boardName, int page) {
+//
+//
+//        Board board = findBoard(boardName);
+//        Page<Post> list = postRepository.findByBoard(board, PageRequest.of(page - 1, 10, Sort.by(Sort.Direction.DESC, "createdAt")));
+//        List<PostListDto> postList = new ArrayList<>();
+//        for (Post post : list) {
+//            postList.add(PostListDto.builder().title(post.getTitle()).postId(post.getPostId())
+//                    .author(post.getAuthor()).viewCount(post.getViewCount()).createdAt(post.getCreatedAt()).build());
+//        }
+//        return postList;
+//    }
 
 //    @Transactional(readOnly = true)
 //    public Map<String, Object> getPostsTest(String boardName, int page){
@@ -101,25 +146,54 @@ public class PostService {
 
     // 게시물을 삭제합니다. 게시물 등록자와 로그인 회원정보가 틀리면 CNotOwnerException 처리합니다.
     @Transactional
-    public boolean deletePost(String email, long postId) {
+    public PostResponseDto deletePost(String email, long postId) {
         Post post = postRepository.findById(postId).orElseThrow(CResourceNotExistException::new);
         User user = post.getUser();
         if (!email.equals(user.getEmail()))
             throw new CNotOwnerException();
+
+        PostDeleteDto postDeleteDto = new PostDeleteDto();
+        postDeleteDto.setTitle(post.getTitle());
+        postDeleteDto.setContent(post.getContent());
+        postDeleteDto.setAuthor(post.getAuthor());
+        postDeleteDto.setPostId(post.getPostId());
+        postDeleteDto.setCreatedAt(post.getCreatedAt());
+        postDeleteDto.setViewCount(post.getViewCount());
+        postDeleteDto.setReplyCount(post.getReplyCount());
         postRepository.delete(post);
-        return true;
+        postDeleteDto.setDeleted(true);
+        return postDeleteDto;
     }
 
     @Transactional
-    public List<PostListDto> getSearchPosts(String boardName, String keyword, int page) {
+    public PaginationDto getSearchPosts(String boardName, String keyword, int page, int size) {
+
+//        int totalCount = (int) postRepository.count();
+
         Board board = findBoard(boardName);
-        Page<Post> list = postRepository.findAllSearch(board, keyword, PageRequest.of(page - 1, 10, Sort.by(Sort.Direction.DESC, "createdAt")));
+        int totalCount = postRepository.countAllSearch(board, keyword);
+        int totalPage = totalCount / size;
+
+        if (totalCount % size > 0) {
+            totalPage++;
+        }
+
+        if (totalPage < page) {
+            page = totalPage;
+        }
+
+
+        Page<Post> list = postRepository.findAllSearch(board, keyword, PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "createdAt")));
         List<PostListDto> postList = new ArrayList<>();
         for (Post post : list) {
             postList.add(PostListDto.builder().title(post.getTitle()).postId(post.getPostId())
                     .author(post.getAuthor()).viewCount(post.getViewCount()).createdAt(post.getCreatedAt()).build());
         }
-        return postList;
+
+        PaginationDto paginationDto = PaginationDto.builder().currentPage(page).totalPage(totalPage).totalCount(totalCount).items(Collections.singletonList(postList)).build();
+
+
+        return paginationDto;
     }
 
 

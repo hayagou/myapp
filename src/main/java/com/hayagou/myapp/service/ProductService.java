@@ -7,6 +7,7 @@ import com.hayagou.myapp.advice.exception.CUserNotFoundException;
 import com.hayagou.myapp.entity.Category;
 import com.hayagou.myapp.entity.Product;
 import com.hayagou.myapp.entity.User;
+import com.hayagou.myapp.model.dto.PaginationDto;
 import com.hayagou.myapp.model.dto.ProductRequestDto;
 import com.hayagou.myapp.model.dto.ProductResponseDto;
 import com.hayagou.myapp.repository.CategoryRepository;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,10 +41,17 @@ public class ProductService {
 
 //    상품등록
     @Transactional
-    public Long registrationProduct(String email, ProductRequestDto productRequestDto){
+    public ProductResponseDto registrationProduct(String email, ProductRequestDto productRequestDto){
         Category category = findCategory(productRequestDto.getCategoryName());
         Product product = Product.builder().category(category).user(userRepository.findByEmail(email).orElseThrow(CUserNotFoundException::new)).name(productRequestDto.getName()).price(productRequestDto.getPrice()).build();
-        return productRepository.save(product).getProductId();
+        productRepository.save(product);
+        ProductResponseDto productResponseDto = ProductResponseDto.builder().productId(product.getProductId())
+                .name(product.getName())
+                .price(product.getPrice())
+                .categoryName(product.getCategory().getName())
+                .build();
+
+        return productResponseDto;
     }
 
 //    상품 단건 조회
@@ -55,14 +64,35 @@ public class ProductService {
 
 //    상품조회
     @Transactional(readOnly = true)
-    public List<ProductResponseDto> getProducts(String categoryName, int page){
+    public PaginationDto getProducts(String categoryName, int page, int size){
+
+
+        int totalCount = (int) productRepository.count();
+
+        // 데이터가 존재 하지 않을 경우
+        if(totalCount == 0){
+            throw new CResourceNotExistException();
+        }
+
+        int totalPage = totalCount / size;
+
+        if (totalCount % size > 0) {
+            totalPage++;
+        }
+
+        if (totalPage < page) {
+            page = totalPage;
+        }
+
         Category category = findCategory(categoryName);
         Page<Product> list = productRepository.findByCategory(category , PageRequest.of(page-1, 10,  Sort.by(Sort.Direction.DESC, "createdAt")));
         List<ProductResponseDto> productList = new ArrayList<>();
         for (Product product: list) {
             productList.add(ProductResponseDto.builder().productId(product.getProductId()).categoryName(product.getCategory().getName()).price(product.getPrice()).name(product.getName()).build());
         }
-        return productList;
+
+        PaginationDto paginationDto = PaginationDto.builder().totalPage(totalPage).totalCount(totalCount).currentPage(page).items(Collections.singletonList(productList)).build();
+        return paginationDto;
     }
 
 //    상품삭제

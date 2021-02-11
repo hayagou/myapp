@@ -21,8 +21,7 @@ import java.util.List;
 public class AdminService {
     final UserRepository userRepository;
 
-
-
+    
     //회원 정보 조회
     public PaginationDto getUsers(int page, int size, String key) {
 
@@ -70,17 +69,12 @@ public class AdminService {
             userList.add(UserResponseDto.builder().name(user.getName()).email(user.getEmail()).roles(user.getRoles()).createdAt(user.getCreatedAt()).build());
         }
 
-//        PaginationDto<?> paginationDto = PaginationDto.builder().totalPage(totalPage).totalPage(totalPage).currentPage(page).items(Collections.singletonList(userList)).build();
-
         PaginationDto paginationDto = PaginationDto.builder().totalPage(totalPage).totalCount(totalCount).currentPage(page).items(Collections.singletonList(userList)).build();
+
         return paginationDto;
 
+
     }
-
-
-    // totalPage =  int totalPage = totalCount / size;
-
-
 
 
 //    public ResponseList<PostListDto> getPosts(String boardName, int page, int size) {

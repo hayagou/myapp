@@ -22,10 +22,12 @@ public class SingController {
     private final ResponseService responseService;
 
     @ApiOperation(value = "이메일 중복 확인", notes = "회원 가입 과정에서 이메일 존재 여부 체크.")
-    @GetMapping(value = "/emailCheck")
+    @GetMapping(value = "/email-check")
     public DataResponse emailCheck(@ApiParam(value = "회원ID : 이메일", required = true) @RequestParam String email) {
 
-        return responseService.getResponse(userService.emailCheck(email));
+        HashMap<String, Boolean> checkResponse = new HashMap<>();
+        checkResponse.put("check", userService.emailCheck(email));
+        return responseService.getResponse(checkResponse);
 
     }
 

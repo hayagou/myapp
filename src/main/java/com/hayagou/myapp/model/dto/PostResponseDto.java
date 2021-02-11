@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
+@Setter
 public class PostResponseDto {
     private Long postId;
     private String title;
