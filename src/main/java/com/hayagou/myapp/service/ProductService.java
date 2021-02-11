@@ -8,6 +8,7 @@ import com.hayagou.myapp.entity.Category;
 import com.hayagou.myapp.entity.Product;
 import com.hayagou.myapp.entity.User;
 import com.hayagou.myapp.model.dto.PaginationDto;
+import com.hayagou.myapp.model.dto.ProductDeleteDto;
 import com.hayagou.myapp.model.dto.ProductRequestDto;
 import com.hayagou.myapp.model.dto.ProductResponseDto;
 import com.hayagou.myapp.repository.CategoryRepository;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -62,12 +64,10 @@ public class ProductService {
         return productResponseDto;
     }
 
-//    상품조회
-    @Transactional(readOnly = true)
-    public PaginationDto getProducts(String categoryName, int page, int size){
-
-
-        int totalCount = (int) productRepository.count();
+    @Transactional
+    public PaginationDto getSearchProducts(String categoryName, String keyword, int page, int size){
+        Category category = findCategory(categoryName);
+        int totalCount = (int) productRepository.countAllBySearch(category, keyword);
 
         // 데이터가 존재 하지 않을 경우
         if(totalCount == 0){
@@ -84,8 +84,41 @@ public class ProductService {
             page = totalPage;
         }
 
+
+        Page<Product> list = productRepository.findAllSearch(category, keyword, PageRequest.of(page-1, size,  Sort.by(Sort.Direction.DESC, "createdAt")));
+
+        List<ProductResponseDto> productList = new ArrayList<>();
+        for (Product product: list) {
+            productList.add(ProductResponseDto.builder().productId(product.getProductId()).categoryName(product.getCategory().getName()).price(product.getPrice()).name(product.getName()).build());
+        }
+
+        PaginationDto paginationDto = PaginationDto.builder().totalPage(totalPage).totalCount(totalCount).currentPage(page).items(Collections.singletonList(productList)).build();
+        return paginationDto;
+    }
+//    상품조회
+    @Transactional(readOnly = true)
+    public PaginationDto getProducts(String categoryName, int page, int size){
+
         Category category = findCategory(categoryName);
-        Page<Product> list = productRepository.findByCategory(category , PageRequest.of(page-1, 10,  Sort.by(Sort.Direction.DESC, "createdAt")));
+        int totalCount = (int) productRepository.countAllByCategory(category);
+
+        // 데이터가 존재 하지 않을 경우
+        if(totalCount == 0){
+            throw new CResourceNotExistException();
+        }
+
+        int totalPage = totalCount / size;
+
+        if (totalCount % size > 0) {
+            totalPage++;
+        }
+
+        if (totalPage < page) {
+            page = totalPage;
+        }
+
+
+        Page<Product> list = productRepository.findByCategory(category , PageRequest.of(page-1, size,  Sort.by(Sort.Direction.DESC, "createdAt")));
         List<ProductResponseDto> productList = new ArrayList<>();
         for (Product product: list) {
             productList.add(ProductResponseDto.builder().productId(product.getProductId()).categoryName(product.getCategory().getName()).price(product.getPrice()).name(product.getName()).build());
@@ -97,14 +130,18 @@ public class ProductService {
 
 //    상품삭제
     @Transactional
-    public boolean delProduct(String email, Long productId){
+    public ProductDeleteDto delProduct(String email, Long productId){
         Product product = productRepository.findById(productId).orElseThrow(CResourceNotExistException::new);
         User user = product.getUser();
         if(!email.equals(user.getEmail())){
             throw new CNotOwnerException();
         }
+
+        ProductResponseDto productResponseDto = ProductResponseDto.builder().categoryName(product.getCategory().getName()).productId(product.getProductId()).name(product.getName()).price(product.getPrice()).build();
+        ProductDeleteDto productDeleteDto = (ProductDeleteDto) productResponseDto;
         productRepository.deleteById(productId);
-        return true;
+        productDeleteDto.setDeleted(true);
+        return productDeleteDto;
 
     }
 
